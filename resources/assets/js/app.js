@@ -8,7 +8,7 @@
 require('./bootstrap');
 
 window.Vue = require('vue');
-Vue.use(require('vue-chat-scroll'))
+
 /**
  * Next, we will create a fresh Vue application instance and attach it to
  * the page. Then, you may begin adding     components to this application
@@ -31,17 +31,52 @@ const app = new Vue({
     },
     methods: {
         addMessage(message) {
-            this.messages.push(message)
-            window.axios.post('/messages', message).then(response => { //todo look!!
-
-            })
+            if (this.userHasAccess(message)) {
+                this.messages.push(message)
+                // sending the request to server with new message and get the response with data
+                window.axios.post('/messages', message)
+            }
         },
         fetchMessages() {
             window.axios.get('/messages').then(response => {
                 this.messages = response.data
             })
-        }
+        },
 
+        userHasAccess (message) {
+            //
+            console.log('1.get user instance')
+            console.log(this.getUsersStateFromMessageInstance(message))
+            //
+            return !this.bannedOrDisabled(this.getUsersStateFromMessageInstance(message))
+        },
+
+        userBanned(user) {
+            //
+            console.log('2. is banned')
+            console.log(Boolean(user.baned))
+            console.log('Has access?')
+            //
+            return Boolean(user.baned)
+        },
+
+        userDisabled(user) {
+            //
+            console.log('3. is disabled')
+            console.log(Boolean(user.disabled))
+            console.log('Has access?')
+            //
+            return Boolean(user.disabled)
+        },
+
+        bannedOrDisabled(user) {
+            return !!(this.userBanned(user) || this.userDisabled(user))
+        },
+
+        getUsersStateFromMessageInstance(message) {
+            return message.user
+        },
+        
     }
 
 });

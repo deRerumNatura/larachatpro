@@ -3,15 +3,12 @@
          <span v-show="message.typing" class="help-block" style="font-style: italic;">
             {{ message.typingUser }} is typing...
         </span>
-        <div v-show="sendButton" transition="slide" class="alert alert-danger">Wait for 15 second, to send next message.</div>
-        <form @submit.prevent.keyup="sent" class="d-flex mt-3">
-            <div class="form-group w-100 input-field">
-                <textarea type="text" class="form-control h-100" v-model="message.message" @keyup="isTyping"></textarea>
+        <form @submit.prevent.keyup="sent">
+            <div class="form-group">
+                <input type="text" class="form-control" v-model="message.message" @keyup="isTyping">
             </div>
-            <div class="form-group mx-3 d-flex align-items-center">
-                <button :disabled="sendButton" type="submit" class="btn btn-danger bmd-btn-fab is-disabled">
-                    <i class="far fa-paper-plane"></i>
-                </button>
+            <div class="form-group">
+                <button :disabled="sendButton" type="submit" class="btn btn-danger bmd-btn-fab">Sent</button>
             </div>
         </form>
     </div>
@@ -62,13 +59,12 @@
                     });
             },
             settingTimeout () {
-                let timeOfDelay = 15000;
+                let _this = this;
 
                 this.sendButton = true
-
-                setTimeout(() => {
-                    this.sendButton = false
-                }, timeOfDelay);
+                setTimeout(function(){
+                    _this.sendButton = false
+                }, 15000);
             }
         }
     }

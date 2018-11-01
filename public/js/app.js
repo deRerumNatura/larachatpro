@@ -17331,7 +17331,7 @@ module.exports = __webpack_require__(97);
 __webpack_require__(35);
 
 window.Vue = __webpack_require__(82);
-Vue.use(__webpack_require__(85));
+
 /**
  * Next, we will create a fresh Vue application instance and attach it to
  * the page. Then, you may begin adding     components to this application
@@ -17356,10 +17356,11 @@ var app = new Vue({
 
     methods: {
         addMessage: function addMessage(message) {
-            this.messages.push(message);
-            window.axios.post('/messages', message).then(function (response) {//todo look!!
-
-            });
+            if (this.userHasAccess(message)) {
+                this.messages.push(message);
+                // sending the request to server with new message and get the response with data
+                window.axios.post('/messages', message);
+            }
         },
         fetchMessages: function fetchMessages() {
             var _this2 = this;
@@ -17367,6 +17368,35 @@ var app = new Vue({
             window.axios.get('/messages').then(function (response) {
                 _this2.messages = response.data;
             });
+        },
+        userHasAccess: function userHasAccess(message) {
+            //
+            console.log('1.get user instance');
+            console.log(this.getUsersStateFromMessageInstance(message));
+            //
+            return !this.bannedOrDisabled(this.getUsersStateFromMessageInstance(message));
+        },
+        userBanned: function userBanned(user) {
+            //
+            console.log('2. is banned');
+            console.log(Boolean(user.baned));
+            console.log('Has access?');
+            //
+            return Boolean(user.baned);
+        },
+        userDisabled: function userDisabled(user) {
+            //
+            console.log('3. is disabled');
+            console.log(Boolean(user.disabled));
+            console.log('Has access?');
+            //
+            return Boolean(user.disabled);
+        },
+        bannedOrDisabled: function bannedOrDisabled(user) {
+            return !!(this.userBanned(user) || this.userDisabled(user));
+        },
+        getUsersStateFromMessageInstance: function getUsersStateFromMessageInstance(message) {
+            return message.user;
         }
     }
 
@@ -56704,70 +56734,7 @@ exports.clearImmediate = (typeof self !== "undefined" && self.clearImmediate) ||
 /* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(0), __webpack_require__(8)))
 
 /***/ }),
-/* 85 */
-/***/ (function(module, exports, __webpack_require__) {
-
-(function (global, factory) {
-	 true ? module.exports = factory() :
-	typeof define === 'function' && define.amd ? define(factory) :
-	(global['vue-chat-scroll'] = factory());
-}(this, (function () { 'use strict';
-
-/**
-* @name VueJS vChatScroll (vue-chat-scroll)
-* @description Monitors an element and scrolls to the bottom if a new child is added
-* @author Theodore Messinezis <theo@theomessin.com>
-* @file v-chat-scroll  directive definition
-*/
-
-var scrollToBottom = function scrollToBottom(el, smooth) {
-  el.scroll({
-    top: el.scrollHeight,
-    behavior: smooth ? 'smooth' : 'instant'
-  });
-};
-
-var vChatScroll = {
-  bind: function bind(el, binding) {
-    var scrolled = false;
-
-    el.addEventListener('scroll', function (e) {
-      scrolled = el.scrollTop + el.clientHeight + 1 < el.scrollHeight;
-    });
-
-    new MutationObserver(function (e) {
-      var config = binding.value || {};
-      var pause = config.always === false && scrolled;
-      if (pause || e[e.length - 1].addedNodes.length != 1) return;
-      scrollToBottom(el, config.smooth);
-    }).observe(el, { childList: true });
-  },
-  inserted: scrollToBottom
-};
-
-/**
-* @name VueJS vChatScroll (vue-chat-scroll)
-* @description Monitors an element and scrolls to the bottom if a new child is added
-* @author Theodore Messinezis <theo@theomessin.com>
-* @file vue-chat-scroll plugin definition
-*/
-
-var VueChatScroll = {
-  install: function install(Vue, options) {
-    Vue.directive('chat-scroll', vChatScroll);
-  }
-};
-
-if (typeof window !== 'undefined' && window.Vue) {
-  window.Vue.use(VueChatScroll);
-}
-
-return VueChatScroll;
-
-})));
-
-
-/***/ }),
+/* 85 */,
 /* 86 */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -56853,7 +56820,7 @@ exports = module.exports = __webpack_require__(89)(false);
 
 
 // module
-exports.push([module.i, "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n", ""]);
+exports.push([module.i, "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n", ""]);
 
 // exports
 
@@ -57225,16 +57192,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 //
 
 /* harmony default export */ __webpack_exports__["default"] = ({
-    props: ['messages'],
-    updated: function updated() {
-        var mes = this.messages;
-
-        var gett = mes.filter(function (messagee) {
-            return messagee;
-        });
-
-        console.log(gett);
-    }
+    props: ['messages']
 });
 
 /***/ }),
@@ -57247,10 +57205,7 @@ var render = function() {
   var _c = _vm._self._c || _h
   return _c(
     "div",
-    {
-      directives: [{ name: "chat-scroll", rawName: "v-chat-scroll" }],
-      staticClass: "chatroom"
-    },
+    { staticClass: "chatroom" },
     _vm._l(_vm.messages, function(message) {
       return _c(
         "div",
@@ -57268,15 +57223,6 @@ var render = function() {
                     style: { color: message.user.color }
                   },
                   [_vm._v(_vm._s(message.user.name))]
-                ),
-                _vm._v(" "),
-                _c(
-                  "span",
-                  {
-                    staticClass: "post_time",
-                    style: { color: message.user.color }
-                  },
-                  [_vm._v(_vm._s(message.created_at))]
                 )
               ]
             ),
@@ -57376,9 +57322,6 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 //
 //
 //
-//
-//
-//
 
 /* harmony default export */ __webpack_exports__["default"] = ({
     props: ['user'],
@@ -57394,16 +57337,17 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
         };
     },
     created: function created() {
-        var _this = this;
+        var _this2 = this;
 
         window.Echo.private('chat-room').listenForWhisper('typing', function (e) {
-            _this.message.typing = e.typing;
+            var _this = _this2;
 
+            _this2.message.typing = e.typing;
             setTimeout(function () {
                 _this.message.typing = false;
-            }, 3000);
+            }, 1000);
 
-            _this.message.typingUser = e.user.name;
+            _this2.message.typingUser = e.user.name;
         });
     },
 
@@ -57426,15 +57370,12 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
             });
         },
         settingTimeout: function settingTimeout() {
-            var _this2 = this;
-
-            var timeOfDelay = 15000;
+            var _this = this;
 
             this.sendButton = true;
-
             setTimeout(function () {
-                _this2.sendButton = false;
-            }, timeOfDelay);
+                _this.sendButton = false;
+            }, 15000);
         }
     }
 });
@@ -57470,26 +57411,8 @@ var render = function() {
     ),
     _vm._v(" "),
     _c(
-      "div",
-      {
-        directives: [
-          {
-            name: "show",
-            rawName: "v-show",
-            value: _vm.sendButton,
-            expression: "sendButton"
-          }
-        ],
-        staticClass: "alert alert-danger",
-        attrs: { transition: "slide" }
-      },
-      [_vm._v("Wait for 15 second, to send next message.")]
-    ),
-    _vm._v(" "),
-    _c(
       "form",
       {
-        staticClass: "d-flex mt-3",
         on: {
           submit: function($event) {
             if (
@@ -57504,8 +57427,8 @@ var render = function() {
         }
       },
       [
-        _c("div", { staticClass: "form-group w-100 input-field" }, [
-          _c("textarea", {
+        _c("div", { staticClass: "form-group" }, [
+          _c("input", {
             directives: [
               {
                 name: "model",
@@ -57514,7 +57437,7 @@ var render = function() {
                 expression: "message.message"
               }
             ],
-            staticClass: "form-control h-100",
+            staticClass: "form-control",
             attrs: { type: "text" },
             domProps: { value: _vm.message.message },
             on: {
@@ -57529,20 +57452,16 @@ var render = function() {
           })
         ]),
         _vm._v(" "),
-        _c(
-          "div",
-          { staticClass: "form-group mx-3 d-flex align-items-center" },
-          [
-            _c(
-              "button",
-              {
-                staticClass: "btn btn-danger bmd-btn-fab is-disabled",
-                attrs: { disabled: _vm.sendButton, type: "submit" }
-              },
-              [_c("i", { staticClass: "far fa-paper-plane" })]
-            )
-          ]
-        )
+        _c("div", { staticClass: "form-group" }, [
+          _c(
+            "button",
+            {
+              staticClass: "btn btn-danger bmd-btn-fab",
+              attrs: { disabled: _vm.sendButton, type: "submit" }
+            },
+            [_vm._v("Sent")]
+          )
+        ])
       ]
     )
   ])

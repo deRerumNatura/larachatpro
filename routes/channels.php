@@ -12,5 +12,5 @@
 */
 
 Broadcast::channel('chat-room', function ($user) {
-    return (int) $user->id === (int) auth()->user()->id;
+    return (int) $user->id === auth()->user()->id;
 });

@@ -10426,16 +10426,3 @@ a.text-dark:focus {
   position: absolute;
 }
 
-.chatroom {
-  height: 70vh;
-  overflow-y: scroll;
-}
-
-.panel .sending-form .input-field {
-  height: 10vh;
-}
-
-.panel .sending-form .is-disabled:disabled {
-  background-color: #d0ccc0;
-}
-

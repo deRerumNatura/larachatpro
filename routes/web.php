@@ -31,4 +31,3 @@ Route::post('register', 'Auth\AuthenticationController@login');
 Route::resource('messages', 'MessagesController', ['only' => [
     'index', 'store'
 ]])->middleware('chat');
-
